@@ -13432,7 +13432,7 @@ module.exports = g;
 /*! exports provided: name, version, main, types, browser, engines, scripts, license, repository, dependencies, devDependencies, default */
 /***/ (function(module) {
 
-module.exports = {"name":"lightstep-tracer","version":"0.28.0","main":"index.js","types":"index.d.ts","browser":"browser.js","engines":{"node":">=8.0.0"},"scripts":{"test":"rm -f test/results/*.json && node node_modules/mocha/bin/mocha -c test/unittest_node.js","version":"make build && git add -A dist"},"license":"MIT","repository":{"type":"git","url":"http://github.com/lightstep/lightstep-tracer-javascript.git"},"dependencies":{"async":"1.5.0","eventemitter3":"1.1.1","google-protobuf":"3.6.1","hex2dec":"1.0.1","opentracing":"^0.14.4","source-map-support":"0.3.3","thrift":"0.13.0"},"devDependencies":{"babel-cli":"6.14.0","babel-core":"^6.26.3","babel-loader":"7","babel-plugin-add-module-exports":"^1.0.0","babel-plugin-check-es2015-constants":"6.7.2","babel-plugin-syntax-object-rest-spread":"^6.13.0","babel-plugin-transform-es2015-arrow-functions":"6.5.2","babel-plugin-transform-es2015-block-scoped-functions":"6.6.5","babel-plugin-transform-es2015-block-scoping":"^6.26.0","babel-plugin-transform-es2015-classes":"6.6.5","babel-plugin-transform-es2015-computed-properties":"6.6.5","babel-plugin-transform-es2015-destructuring":"6.6.5","babel-plugin-transform-es2015-duplicate-keys":"6.6.4","babel-plugin-transform-es2015-literals":"6.5.0","babel-plugin-transform-es2015-modules-commonjs":"6.7.4","babel-plugin-transform-es2015-object-super":"6.6.5","babel-plugin-transform-es2015-parameters":"6.7.0","babel-plugin-transform-es2015-spread":"^6.6.5","babel-plugin-transform-es2015-sticky-regex":"6.5.0","babel-plugin-transform-es2015-template-literals":"6.6.5","babel-plugin-transform-es2015-unicode-regex":"6.5.0","babel-polyfill":"6.3.14","babel-preset-es2015":"6.3.13","chai":"3.4.1","clone":"1.0.2","colors":"1.1.2","eslint":"^6.8.0","eslint-config-airbnb":"^18.0.1","eslint-plugin-import":"^2.20.0","eslint-plugin-jsx-a11y":"^6.2.3","eslint-plugin-react":"^7.18.0","express":"^4.16.3","istanbul":"^0.4.5","mocha":"^5.2.0","shelljs":"0.5.3","sprintf-js":"1.0.3","underscore":"1.8.3","watch-trigger":"0.0.5","webpack":"^4.25.1","webpack-cli":"^3.1.2"}};
+module.exports = {"name":"lightstep-tracer","version":"0.29.0","main":"index.js","types":"index.d.ts","browser":"browser.js","engines":{"node":">=8.0.0"},"scripts":{"test":"rm -f test/results/*.json && node node_modules/mocha/bin/mocha -c test/unittest_node.js","version":"make build && git add -A dist"},"license":"MIT","repository":{"type":"git","url":"http://github.com/lightstep/lightstep-tracer-javascript.git"},"dependencies":{"async":"1.5.0","eventemitter3":"1.1.1","google-protobuf":"3.6.1","hex2dec":"1.0.1","opentracing":"^0.14.4","source-map-support":"0.3.3","thrift":"0.13.0"},"devDependencies":{"babel-cli":"6.14.0","babel-core":"^6.26.3","babel-loader":"7","babel-plugin-add-module-exports":"^1.0.0","babel-plugin-check-es2015-constants":"6.7.2","babel-plugin-syntax-object-rest-spread":"^6.13.0","babel-plugin-transform-es2015-arrow-functions":"6.5.2","babel-plugin-transform-es2015-block-scoped-functions":"6.6.5","babel-plugin-transform-es2015-block-scoping":"^6.26.0","babel-plugin-transform-es2015-classes":"6.6.5","babel-plugin-transform-es2015-computed-properties":"6.6.5","babel-plugin-transform-es2015-destructuring":"6.6.5","babel-plugin-transform-es2015-duplicate-keys":"6.6.4","babel-plugin-transform-es2015-literals":"6.5.0","babel-plugin-transform-es2015-modules-commonjs":"6.7.4","babel-plugin-transform-es2015-object-super":"6.6.5","babel-plugin-transform-es2015-parameters":"6.7.0","babel-plugin-transform-es2015-spread":"^6.6.5","babel-plugin-transform-es2015-sticky-regex":"6.5.0","babel-plugin-transform-es2015-template-literals":"6.6.5","babel-plugin-transform-es2015-unicode-regex":"6.5.0","babel-polyfill":"6.3.14","babel-preset-es2015":"6.3.13","chai":"3.4.1","clone":"1.0.2","colors":"1.1.2","eslint":"^6.8.0","eslint-config-airbnb":"^18.0.1","eslint-plugin-import":"^2.20.0","eslint-plugin-jsx-a11y":"^6.2.3","eslint-plugin-react":"^7.18.0","express":"^4.16.3","fetch-mock":"^9.2.1","istanbul":"^0.4.5","mocha":"^5.2.0","shelljs":"0.5.3","sinon":"^9.0.1","sprintf-js":"1.0.3","underscore":"1.8.3","watch-trigger":"0.0.5","webpack":"^4.25.1","webpack-cli":"^3.1.2"}};
 
 /***/ }),
 
@@ -18098,6 +18098,8 @@ module.exports = __webpack_require__(/*! ./generated/thrift_all.js */ "./src/imp
 "use strict";
 
 
+var util = __webpack_require__(/*! ./util */ "./src/imp/platform/browser/util.js");
+
 /* global WorkerGlobalScope */
 // Find the HTML element that included the tracing library (if there is one).
 // This relies on the fact that scripts are executed as soon as they are
@@ -18107,6 +18109,9 @@ var hostScriptElement = function () {
     // check to see if we're in a webworker
     // eslint-disable-next-line no-restricted-globals
     if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+        return null;
+    }
+    if (!util.isBrowser()) {
         return null;
     }
     var scripts = document.getElementsByTagName('SCRIPT');
@@ -18143,7 +18148,7 @@ function urlQueryParameters(defaults) {
 //
 // Note: relies on the global hostScriptElement variable defined above.
 //
-module.exports.parseScriptElementOptions = function (opts, browserOpts) {
+function parseScriptElementOptions(opts, browserOpts) {
     if (!hostScriptElement) {
         return;
     }
@@ -18211,7 +18216,9 @@ module.exports.parseScriptElementOptions = function (opts, browserOpts) {
     if (typeof dataset.instrument_page_load === 'string' && dataset.instrument_page_load === 'true') {
         opts.instrument_page_load = true;
     }
-};
+}
+
+function parseScriptElementOptionsNoop(opts, browserOpts) {}
 
 // Parses options out of the current URL query string. The query parameters use
 // the 'lightstep_' prefix to reduce the chance of collision with
@@ -18220,11 +18227,7 @@ module.exports.parseScriptElementOptions = function (opts, browserOpts) {
 // This mechanism is particularly useful for debugging purposes as it does not
 // require any code or configuration changes.
 //
-module.exports.parseURLQueryOptions = function (opts) {
-    if (!window) {
-        return;
-    }
-
+function parseURLQueryOptions(opts) {
     var params = urlQueryParameters();
     if (params.lightstep_verbosity) {
         try {
@@ -18234,6 +18237,15 @@ module.exports.parseURLQueryOptions = function (opts) {
     if (params.lightstep_log_to_console) {
         opts.log_to_console = true;
     }
+}
+
+function parseURLQueryOptionsNoop(opts) {
+    return {};
+}
+
+module.exports = {
+    parseScriptElementOptions: util.isBrowser() ? parseScriptElementOptions : parseScriptElementOptionsNoop,
+    parseURLQueryOptions: util.isBrowser() ? parseURLQueryOptions : parseURLQueryOptionsNoop
 };
 
 /***/ }),
@@ -18327,7 +18339,10 @@ var PlatformBrowser = function () {
     }, {
         key: 'onBeforeExit',
         value: function onBeforeExit() {
-            if (window) {
+            // This will result in the final report not being made in non-browser
+            // environments like React Native. Flush should be called explicitly in
+            // those environments
+            if (util.isBrowser()) {
                 var _window;
 
                 for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -18670,6 +18685,10 @@ module.exports = exports.default;
 
 /* eslint-disable */
 
+function isBrowser() {
+    return typeof document !== "undefined";
+}
+
 // This function is copied directly from https://github.com/litejs/browser-cookie-lite.
 // It is licensed under the MIT License and authored by Lauri Rooden.
 function cookie(name, value, ttl, path, domain, secure) {
@@ -18681,10 +18700,15 @@ function cookie(name, value, ttl, path, domain, secure) {
     return decodeURIComponent((("; " + document.cookie).split("; " + name + "=")[1] || "").split(";")[0]);
 }
 
+function cookieNoop() {
+    return null;
+}
+
 /* eslint-enable */
 
 module.exports = {
-    cookie: cookie
+    cookie: isBrowser() ? cookie : cookieNoop,
+    isBrowser: isBrowser
 };
 
 /***/ }),
@@ -18792,8 +18816,13 @@ var B3Propagator = function (_LightStepPropagator) {
                 return;
             }
 
+            var traceId = spanContext.traceGUID();
+            if (traceId.length === 32 && traceId.substr(0, 16) === '0000000000000000') {
+                traceId = traceId.substr(16); // take least significant 8 bytes (16 chars)
+            }
+
             carrier[this._carrierPrefix + 'spanid'] = spanContext._guid;
-            carrier[this._carrierPrefix + 'traceid'] = spanContext.traceGUID();
+            carrier[this._carrierPrefix + 'traceid'] = traceId;
             if (spanContext._sampled) {
                 carrier[this._carrierPrefix + 'sampled'] = '1';
             } else {
@@ -21884,6 +21913,8 @@ var InstrumentFetch = function () {
             tracerImp.addOption('fetch_instrumentation', { type: 'bool', defaultValue: false });
             tracerImp.addOption('fetch_url_inclusion_patterns', { type: 'array', defaultValue: [/.*/] });
             tracerImp.addOption('fetch_url_exclusion_patterns', { type: 'array', defaultValue: [] });
+            tracerImp.addOption('fetch_url_header_inclusion_patterns', { type: 'array', defaultValue: [/.*/] });
+            tracerImp.addOption('fetch_url_header_exclusion_patterns', { type: 'array', defaultValue: [] });
             tracerImp.addOption('include_cookies', { type: 'bool', defaultValue: true });
         }
     }, {
@@ -22019,11 +22050,13 @@ var InstrumentFetch = function () {
                 }
 
                 // Add Open-Tracing headers
-                var headersCarrier = {};
-                tracer.inject(span.context(), opentracing.FORMAT_HTTP_HEADERS, headersCarrier);
-                Object.keys(headersCarrier).forEach(function (key) {
-                    if (!request.headers.get(key)) request.headers.set(key, headersCarrier[key]);
-                });
+                if (self._shouldAddHeadersToRequest(tracer, request.url)) {
+                    var headersCarrier = {};
+                    tracer.inject(span.context(), opentracing.FORMAT_HTTP_HEADERS, headersCarrier);
+                    Object.keys(headersCarrier).forEach(function (key) {
+                        if (!request.headers.get(key)) request.headers.set(key, headersCarrier[key]);
+                    });
+                }
                 span.log({
                     event: 'sending',
                     method: request.method,
@@ -22078,18 +22111,42 @@ var InstrumentFetch = function () {
                 return false;
             }
 
-            var include = false;
-            if (opts.fetch_url_inclusion_patterns.some(function (inc) {
-                return inc.test(url);
-            })) {
-                include = true;
-            }
             if (opts.fetch_url_exclusion_patterns.some(function (ex) {
                 return ex.test(url);
             })) {
-                include = false;
+                return false;
             }
-            return include;
+            if (opts.fetch_url_inclusion_patterns.some(function (inc) {
+                return inc.test(url);
+            })) {
+                return true;
+            }
+            return false;
+        }
+    }, {
+        key: '_shouldAddHeadersToRequest',
+        value: function _shouldAddHeadersToRequest(tracer, url) {
+            // This shouldn't be possible, but let's be paranoid
+            if (!tracer || !url) {
+                return false;
+            }
+
+            var opts = tracer.options();
+            if (opts.disabled) {
+                return false;
+            }
+
+            if (opts.fetch_url_header_exclusion_patterns.some(function (ex) {
+                return ex.test(url);
+            })) {
+                return false;
+            }
+            if (opts.fetch_url_header_inclusion_patterns.some(function (inc) {
+                return inc.test(url);
+            })) {
+                return true;
+            }
+            return false;
         }
     }]);
 
@@ -22193,6 +22250,8 @@ var InstrumentXHR = function () {
             tracerImp.addOption('xhr_instrumentation', { type: 'bool', defaultValue: false });
             tracerImp.addOption('xhr_url_inclusion_patterns', { type: 'array', defaultValue: [/.*/] });
             tracerImp.addOption('xhr_url_exclusion_patterns', { type: 'array', defaultValue: [] });
+            tracerImp.addOption('xhr_url_header_inclusion_patterns', { type: 'array', defaultValue: [/.*/] });
+            tracerImp.addOption('xhr_url_header_exclusion_patterns', { type: 'array', defaultValue: [] });
             tracerImp.addOption('include_cookies', { type: 'bool', defaultValue: true });
         }
     }, {
@@ -22433,12 +22492,14 @@ var InstrumentXHR = function () {
                 });
 
                 // Add Open-Tracing headers
-                var headersCarrier = {};
-                tracer.inject(span.context(), opentracing.FORMAT_HTTP_HEADERS, headersCarrier);
-                var keys = Object.keys(headersCarrier);
-                keys.forEach(function (key) {
-                    proxied.setRequestHeader.call(_this, key, headersCarrier[key]);
-                });
+                if (self._shouldAddHeadersToRequest(tracer, this.__tracer_url)) {
+                    var headersCarrier = {};
+                    tracer.inject(span.context(), opentracing.FORMAT_HTTP_HEADERS, headersCarrier);
+                    var keys = Object.keys(headersCarrier);
+                    keys.forEach(function (key) {
+                        proxied.setRequestHeader.call(_this, key, headersCarrier[key]);
+                    });
+                }
 
                 return proxied.send.apply(this, arguments);
             };
@@ -22462,18 +22523,42 @@ var InstrumentXHR = function () {
                 return false;
             }
 
-            var include = false;
-            if (opts.xhr_url_inclusion_patterns.some(function (inc) {
-                return inc.test(url);
-            })) {
-                include = true;
-            }
             if (opts.xhr_url_exclusion_patterns.some(function (ex) {
                 return ex.test(url);
             })) {
-                include = false;
+                return false;
             }
-            return include;
+            if (opts.xhr_url_inclusion_patterns.some(function (inc) {
+                return inc.test(url);
+            })) {
+                return true;
+            }
+            return false;
+        }
+    }, {
+        key: '_shouldAddHeadersToRequest',
+        value: function _shouldAddHeadersToRequest(tracer, url) {
+            // This shouldn't be possible, but let's be paranoid
+            if (!tracer || !url) {
+                return false;
+            }
+
+            var opts = tracer.options();
+            if (opts.disabled) {
+                return false;
+            }
+
+            if (opts.xhr_url_header_exclusion_patterns.some(function (ex) {
+                return ex.test(url);
+            })) {
+                return false;
+            }
+            if (opts.xhr_url_header_inclusion_patterns.some(function (inc) {
+                return inc.test(url);
+            })) {
+                return true;
+            }
+            return false;
         }
     }]);
 
